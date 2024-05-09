@@ -205,35 +205,40 @@ button = st.button("Predict")
 
 # Check if both text areas have input and the button was clicked
 if (trade_msg and sgw_op) and button:
-    # Clean user input by removing newline characters
-    trade_msg1 = trade_msg.replace('\n', '')
-    sgw_op1 = sgw_op.replace('\n', '')
+    try:
+        # Clean user input by removing newline characters
+        trade_msg1 = trade_msg.replace('\n', '')
+        sgw_op1 = sgw_op.replace('\n', '')
+
+        # Extract the first and second allocations from the SGW operation
+        ex_sgw_op1 = extract_first_alloc(sgw_op1)
+        ex_sgw_op2 = extract_second_alloc(sgw_op1)
+
+        # Generate the first and second CCP messages
+        ccp_msg1 = predict1(trade_msg1, ex_sgw_op1, model1)
+        ccp_msg2 = predict2(trade_msg1, ex_sgw_op2, model2)
+
+        # Display the generated CCP messages for the first two allocations
+        st.write("CCP Message 1: ", ccp_msg1) 
+        st.write("CCP Message 2: ", ccp_msg2) 
+
+        # Handle additional splits based on user selection
+        if split_option == "Split On Three Accounts":
+            # Extract and process the third allocation
+            ex_sgw_op3 = extract_third_alloc(sgw_op1)
+            ccp_msg3 = predict2(trade_msg1, ex_sgw_op3, model2)        
+            st.write("CCP Message 3: ", ccp_msg3)  # Display the third CCP message
+
+        elif split_option == "Split On Four Accounts":
+            # Extract and process the third and fourth allocations
+            ex_sgw_op3 = extract_third_alloc(sgw_op1)
+            ccp_msg3 = predict2(trade_msg1, ex_sgw_op3, model2)        
+            st.write("CCP Message 3: ", ccp_msg3)  # Display the third CCP message
+
+            ex_sgw_op4 = extract_fourth_alloc(sgw_op1)
+            ccp_msg4 = predict2(trade_msg1, ex_sgw_op4, model2)        
+            st.write("CCP Message 4: ", ccp_msg4)  # Display the fourth CCP message
     
-    # Extract the first and second allocations from SGW operation 
-    ex_sgw_op1 = extract_first_alloc(sgw_op1)
-    ex_sgw_op2 = extract_second_alloc(sgw_op1)
-    
-    # Generate the first and second CCP messages 
-    ccp_msg1 = predict1(trade_msg1, ex_sgw_op1, model1)
-    ccp_msg2 = predict2(trade_msg1, ex_sgw_op2, model2)
-    
-    # Display the generated CCP messages for the first two allocations
-    st.write("CCP Message 1: ", ccp_msg1) 
-    st.write("CCP Message 2: ", ccp_msg2) 
-    
-    # Handle additional splits based on user selection
-    if split_option == "Split On Three Accounts":
-        # Extract and process the third allocation
-        ex_sgw_op3 = extract_third_alloc(sgw_op1)
-        ccp_msg3 = predict2(trade_msg1, ex_sgw_op3, model2)        
-        st.write("CCP Message 3: ", ccp_msg3)  # Display the third CCP message
-        
-    elif split_option == "Split On Four Accounts":
-        # Extract and process the third and fourth allocations
-        ex_sgw_op3 = extract_third_alloc(sgw_op1)
-        ccp_msg3 = predict2(trade_msg1, ex_sgw_op3, model2)        
-        st.write("CCP Message 3: ", ccp_msg3)  # Display the third CCP message
-        
-        ex_sgw_op4 = extract_fourth_alloc(sgw_op1)
-        ccp_msg4 = predict2(trade_msg1, ex_sgw_op4, model2)        
-        st.write("CCP Message 4: ", ccp_msg4)  # Display the fourth CCP message
+    except Exception as e:
+        # Handle any exception that might occur
+        st.write("There is an error in generating CCP messages. Please verify the Trade Message and the SGW Operation.")
